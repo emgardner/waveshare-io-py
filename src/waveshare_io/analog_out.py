@@ -34,7 +34,7 @@ class ChannelStatus(BaseModel):
     channel_7: float
     channel_8: float
 
-class AnalogIOController:
+class AnalogOutController:
     def __init__(self, client: ModbusClient.AsyncModbusSerialClient, address: int = 1) -> None:
         self._client = client
         self._address = address
@@ -75,7 +75,7 @@ class AnalogIOController:
         )
 
     async def set_channels(self, values: List[float]) -> None:
-        out = [ int(value/1000.0) for value in values ]
+        out = [ int(value * 1000.0) for value in values ]
         await self._client.write_registers(
             HoldingRegisterBases.Outputs, out
         )

@@ -9,7 +9,6 @@ class InputRegisterBases(IntEnum):
     InputChannels = 0x0000
 
 class HoldingRegisterBases(IntEnum):
-    Inputs = 0x0000
     ChannelTypes = 0x1000
     UartParameters = 0x2000
     DeviceAddress = 0x4000
@@ -42,7 +41,7 @@ class ChannelStatus(BaseModel):
     channel_7: float
     channel_8: float
 
-class AnalogIOController:
+class AnalogInController:
     def __init__(self, client: ModbusClient.AsyncModbusSerialClient, address: int = 1) -> None:
         self._client = client
         self._address = address
@@ -98,10 +97,14 @@ class AnalogIOController:
             HoldingRegisterBases.ChannelTypes, [ ch.value for ch in channel_types]
         )
 
-    async def read_channel (self) -> List[float]:
-        response = await self._client.read_holding_registers(
-            HoldingRegisterBases.Inputs,
-            count=8
+    async def read_channel(self, channel: Channel) -> float:
+        response = await self._client.read_input_registers(
+            InputRegisterBases.InputChannels + channel.value
         )
-        out = [ value /1000.0  for value in response.registers ]
+        return response.registers[0] /1000.0
+
+    async def read_channels(self) -> List[float]:
+        out = []
+        for i in range(0, 8):
+            out.append(await self.read_channel(Channel(i)))
         return out
