@@ -88,7 +88,7 @@ class AnalogOutController:
         else:
             output_channel = channel
         await self._client.write_register(
-            HoldingRegisterBases.Outputs + output_channel, int(value / 1000.0)
+            HoldingRegisterBases.Outputs + output_channel, int(value * 1000.0)
         )
 
     async def set_channels(self, values: List[float]) -> None:
