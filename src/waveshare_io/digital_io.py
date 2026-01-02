@@ -36,6 +36,7 @@ class Action(IntEnum):
     Off = 0x0000
     Flip = 0x5500
 
+
 class IoBankState(BaseModel):
     ch0: bool = False
     ch1: bool = False
@@ -61,17 +62,18 @@ class IoBankState(BaseModel):
 
 
 class DigitalIOController:
-
     def __init__(
-            self, 
-            client: Union[ModbusClient.AsyncModbusSerialClient, str], 
-            address: int = 1,
-            baudrate: int = 9600
+        self,
+        client: Union[ModbusClient.AsyncModbusSerialClient, str],
+        address: int = 1,
+        baudrate: int = 9600,
     ) -> None:
         if isinstance(client, ModbusClient.AsyncModbusSerialClient):
             self._client: ModbusClient.AsyncModbusSerialClient = client
         else:
-            self._client = ModbusClient.AsyncModbusSerialClient(client, baudrate=baudrate)
+            self._client = ModbusClient.AsyncModbusSerialClient(
+                client, baudrate=baudrate
+            )
         self._address = address
 
     def set_address(self, address: int) -> None:
@@ -90,7 +92,9 @@ class DigitalIOController:
         if channel > 7:
             raise Exception("Invalid Channel")
         await self._client.write_coil(
-            OutputRegisterBases.OutputChannel + channel, action == Action.On, device_id=self._address
+            OutputRegisterBases.OutputChannel + channel,
+            action == Action.On,
+            device_id=self._address,
         )
 
     async def set_channel_control_mode(self, channel: int, mode: ControlMode) -> None:
@@ -122,16 +126,13 @@ class DigitalIOController:
 
     async def read_output_channels(self) -> IoBankState:
         response = await self._client.read_coils(
-            OutputRegisterBases.OutputChannel ,
-            count=8,
-            device_id=self._address
+            OutputRegisterBases.OutputChannel, count=8, device_id=self._address
         )
         data = 0
         for ix, bit in enumerate(response.bits):
             if bit:
                 data |= 0x01 << ix
         return IoBankState.from_buffer(data)
-
 
     async def set_device_address(self, address: int) -> None:
         if address > 255:

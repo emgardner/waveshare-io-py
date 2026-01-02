@@ -1,5 +1,6 @@
 from enum import IntEnum
 
+
 class Baudrate(IntEnum):
     B4800 = 0x00
     B9600 = 0x01

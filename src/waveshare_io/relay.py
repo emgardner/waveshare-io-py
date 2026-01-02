@@ -57,15 +57,17 @@ class RelayState(BaseModel):
 
 class RelayController:
     def __init__(
-            self, 
-            client: Union[ModbusClient.AsyncModbusSerialClient, str], 
-            address: int = 1,
-            baudrate: int = 9600
+        self,
+        client: Union[ModbusClient.AsyncModbusSerialClient, str],
+        address: int = 1,
+        baudrate: int = 9600,
     ) -> None:
         if isinstance(client, ModbusClient.AsyncModbusSerialClient):
             self._client: ModbusClient.AsyncModbusSerialClient = client
         else:
-            self._client = ModbusClient.AsyncModbusSerialClient(client, baudrate=baudrate)
+            self._client = ModbusClient.AsyncModbusSerialClient(
+                client, baudrate=baudrate
+            )
         self._address = address
 
     def set_address(self, address: int) -> None:
@@ -84,7 +86,9 @@ class RelayController:
         if channel > 7:
             raise Exception("Invalid Channel")
         await self._client.write_coil(
-            OutputRegisterBases.OutputChannel + channel, action == Action.On, device_id=self._address
+            OutputRegisterBases.OutputChannel + channel,
+            action == Action.On,
+            device_id=self._address,
         )
 
     async def set_channels(self, channel: int, actions: List[Action]) -> None:

@@ -8,11 +8,13 @@ from waveshare_io.common import Baudrate, Parity
 class InputRegisterBases(IntEnum):
     InputChannels = 0x0000
 
+
 class HoldingRegisterBases(IntEnum):
     ChannelTypes = 0x1000
     UartParameters = 0x2000
     DeviceAddress = 0x4000
     SoftwareVersion = 0x8000
+
 
 class ChannelType(IntEnum):
     VOLTAGE_0_10V = 0x0000
@@ -20,6 +22,7 @@ class ChannelType(IntEnum):
     CURRENT_0_20MA = 0x0002
     CURRENT_4_20MA = 0x0003
     ADC_OUTPUT = 0x0004
+
 
 class Channel(IntEnum):
     CHANNEL_1 = 0
@@ -31,6 +34,7 @@ class Channel(IntEnum):
     CHANNEL_7 = 6
     CHANNEL_8 = 7
 
+
 class ChannelStatus(BaseModel):
     channel_1: float
     channel_2: float
@@ -41,17 +45,20 @@ class ChannelStatus(BaseModel):
     channel_7: float
     channel_8: float
 
+
 class AnalogInController:
     def __init__(
-            self, 
-            client: Union[ModbusClient.AsyncModbusSerialClient, str], 
-            address: int = 1,
-            baudrate: int = 9600
+        self,
+        client: Union[ModbusClient.AsyncModbusSerialClient, str],
+        address: int = 1,
+        baudrate: int = 9600,
     ) -> None:
         if isinstance(client, ModbusClient.AsyncModbusSerialClient):
             self._client: ModbusClient.AsyncModbusSerialClient = client
         else:
-            self._client = ModbusClient.AsyncModbusSerialClient(client, baudrate=baudrate)
+            self._client = ModbusClient.AsyncModbusSerialClient(
+                client, baudrate=baudrate
+            )
         self._address = address
 
     def set_address(self, address: int) -> None:
@@ -79,7 +86,9 @@ class AnalogInController:
         )
         return response.registers[0]
 
-    async def set_channel_type(self, channel: Union[Channel, int], channel_type: ChannelType) -> None:
+    async def set_channel_type(
+        self, channel: Union[Channel, int], channel_type: ChannelType
+    ) -> None:
         input_channel = 0
         if isinstance(channel, Channel):
             input_channel = channel.value
@@ -98,18 +107,18 @@ class AnalogInController:
         response = await self._client.read_holding_registers(
             HoldingRegisterBases.ChannelTypes + input_channel, count=8
         )
-        return [ ChannelType(value) for value in response.registers]
+        return [ChannelType(value) for value in response.registers]
 
     async def set_channel_types(self, channel_types: List[ChannelType]) -> None:
         await self._client.write_registers(
-            HoldingRegisterBases.ChannelTypes, [ ch.value for ch in channel_types]
+            HoldingRegisterBases.ChannelTypes, [ch.value for ch in channel_types]
         )
 
     async def read_channel(self, channel: Channel) -> float:
         response = await self._client.read_input_registers(
             InputRegisterBases.InputChannels + channel.value
         )
-        return response.registers[0] /1000.0
+        return response.registers[0] / 1000.0
 
     async def read_channels(self) -> List[float]:
         out = []

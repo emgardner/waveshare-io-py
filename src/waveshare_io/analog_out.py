@@ -8,11 +8,13 @@ from waveshare_io.common import Baudrate, Parity
 class InputRegisterBases(IntEnum):
     InputChannels = 0x0000
 
+
 class HoldingRegisterBases(IntEnum):
     Outputs = 0x0000
     UartParameters = 0x2000
     DeviceAddress = 0x4000
     SoftwareVersion = 0x8000
+
 
 class Channel(IntEnum):
     CHANNEL_1 = 0
@@ -24,6 +26,7 @@ class Channel(IntEnum):
     CHANNEL_7 = 6
     CHANNEL_8 = 7
 
+
 class ChannelStatus(BaseModel):
     channel_1: float
     channel_2: float
@@ -34,18 +37,20 @@ class ChannelStatus(BaseModel):
     channel_7: float
     channel_8: float
 
-class AnalogOutController:
 
+class AnalogOutController:
     def __init__(
-            self, 
-            client: Union[ModbusClient.AsyncModbusSerialClient, str], 
-            address: int = 1,
-            baudrate: int = 9600
+        self,
+        client: Union[ModbusClient.AsyncModbusSerialClient, str],
+        address: int = 1,
+        baudrate: int = 9600,
     ) -> None:
         if isinstance(client, ModbusClient.AsyncModbusSerialClient):
             self._client: ModbusClient.AsyncModbusSerialClient = client
         else:
-            self._client = ModbusClient.AsyncModbusSerialClient(client, baudrate=baudrate)
+            self._client = ModbusClient.AsyncModbusSerialClient(
+                client, baudrate=baudrate
+            )
         self._address = address
 
     def set_address(self, address: int) -> None:
@@ -84,15 +89,12 @@ class AnalogOutController:
         )
 
     async def set_channels(self, values: List[float]) -> None:
-        out = [ int(value * 1000.0) for value in values ]
-        await self._client.write_registers(
-            HoldingRegisterBases.Outputs, out
-        )
+        out = [int(value * 1000.0) for value in values]
+        await self._client.write_registers(HoldingRegisterBases.Outputs, out)
 
     async def get_channel_values(self) -> List[float]:
         response = await self._client.read_holding_registers(
-            HoldingRegisterBases.Outputs,
-            count=8
+            HoldingRegisterBases.Outputs, count=8
         )
-        out = [ value /1000.0  for value in response.registers ]
+        out = [value / 1000.0 for value in response.registers]
         return out
