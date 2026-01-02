@@ -59,6 +59,9 @@ class AnalogOutController:
     async def connect(self) -> None:
         await self._client.connect()
 
+    def disconnect(self) -> None:
+        self._client.close()
+
     async def set_device_address(self, address: int) -> None:
         if address > 255:
             raise Exception("Invalid Address Requested")

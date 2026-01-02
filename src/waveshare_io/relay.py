@@ -73,6 +73,9 @@ class RelayController:
     def set_address(self, address: int) -> None:
         self._address = address
 
+    def disconnect(self) -> None:
+        self._client.close()
+
     async def connect(self) -> None:
         await self._client.connect()
 
