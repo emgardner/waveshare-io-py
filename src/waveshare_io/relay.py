@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 import pymodbus.client as ModbusClient
 from pymodbus.framer import FramerType
 from pydantic import BaseModel
@@ -56,10 +56,16 @@ class RelayState(BaseModel):
 
 
 class RelayController:
-    def __init__(self, port: str, baudrate: int, address: int = 1) -> None:
-        self._client = ModbusClient.AsyncModbusSerialClient(
-            port, framer=FramerType.RTU, baudrate=baudrate
-        )
+    def __init__(
+            self, 
+            client: Union[ModbusClient.AsyncModbusSerialClient, str], 
+            address: int = 1,
+            baudrate: int = 9600
+    ) -> None:
+        if isinstance(client, ModbusClient.AsyncModbusSerialClient):
+            self._client: ModbusClient.AsyncModbusSerialClient = client
+        else:
+            self._client = ModbusClient.AsyncModbusSerialClient(client, baudrate=baudrate)
         self._address = address
 
     def set_address(self, address: int) -> None:

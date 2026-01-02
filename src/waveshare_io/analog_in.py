@@ -42,8 +42,16 @@ class ChannelStatus(BaseModel):
     channel_8: float
 
 class AnalogInController:
-    def __init__(self, client: ModbusClient.AsyncModbusSerialClient, address: int = 1) -> None:
-        self._client = client
+    def __init__(
+            self, 
+            client: Union[ModbusClient.AsyncModbusSerialClient, str], 
+            address: int = 1,
+            baudrate: int = 9600
+    ) -> None:
+        if isinstance(client, ModbusClient.AsyncModbusSerialClient):
+            self._client: ModbusClient.AsyncModbusSerialClient = client
+        else:
+            self._client = ModbusClient.AsyncModbusSerialClient(client, baudrate=baudrate)
         self._address = address
 
     def set_address(self, address: int) -> None:
