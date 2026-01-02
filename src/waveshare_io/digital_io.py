@@ -72,10 +72,10 @@ class DigitalIOController:
         await self._client.connect()
 
     async def set_channel_on(self, channel: int) -> None:
-        await self.set_channel(channel, Action.Off)
+        await self.set_channel(channel, Action.On)
 
     async def set_channel_off(self, channel: int) -> None:
-        await self.set_channel(channel, Action.On)
+        await self.set_channel(channel, Action.Off)
 
     async def set_channel(self, channel: int, action: Action) -> None:
         if channel > 7:
